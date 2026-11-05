@@ -4,3 +4,6 @@
 *.test
 *.out
 # fuzzing: keep committed seeds under testdata/fuzz, ignore local cache
+
+# internal planning doc, kept local
+/PRD.md
