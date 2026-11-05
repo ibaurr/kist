@@ -1,0 +1,1 @@
+{"version":1,"secrets":{"API_KEY":{"value":"value with \"quotes\" & <html>","updated_at":"2026-01-02T03:04:05Z"},"EMPTY":{"value":"","updated_at":"2026-01-02T03:04:05Z"},"MULTI":{"value":"line1\nline2\n","updated_at":"2026-01-02T03:04:05Z"},"_UNI9":{"value":"pässwörd ✓","updated_at":"2026-01-02T03:04:05Z"}}}
