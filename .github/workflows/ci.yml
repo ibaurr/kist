@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest ./...
+
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: tests (race)
+        run: go test -race -count=1 ./...
+
+      - name: fuzz smoke
+        run: |
+          go test ./internal/vault -run '^$' -fuzz '^FuzzDecode$' -fuzztime 20s
+          go test ./internal/vault -run '^$' -fuzz '^FuzzValidateName$' -fuzztime 10s
+          go test ./internal/envfile -run '^$' -fuzz '^FuzzParse$' -fuzztime 20s
+          go test ./internal/envfile -run '^$' -fuzz '^FuzzRoundTrip$' -fuzztime 20s
+
+      - name: no network imports outside the agent
+        run: sh scripts/check-no-net.sh
+
+      - name: dependency cap
+        run: sh scripts/check-deps.sh
+
+      - name: size budget (informational)
+        run: |
+          find . -name '*.go' ! -name '*_test.go' -print0 | xargs -0 cat | wc -l
